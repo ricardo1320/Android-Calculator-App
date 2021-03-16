@@ -94,7 +94,7 @@ class BigDecimalViewModel: ViewModel() {
 
             when (pendingOperation) {
                 "=" -> operand1 = value
-                "/" -> operand1 = if (value == BigDecimal.valueOf(0)) {
+                "/" -> operand1 = if (value == BigDecimal.ZERO || value == BigDecimal.valueOf(0.0)) {
                     BigDecimal.valueOf(Double.NaN) // handle attempt to divide by zero
                 } else {
                     operand1!! / value //!! bang bang = sintax to handle a nullable variable in an operation with a non nullable variable
