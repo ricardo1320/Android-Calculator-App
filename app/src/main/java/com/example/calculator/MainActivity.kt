@@ -6,33 +6,30 @@ import android.view.View
 import android.widget.Button
 //import android.widget.EditText
 //import android.widget.TextView
+import androidx.activity.viewModels
 
 //import to access the widgets as any other property in the code
 import kotlinx.android.synthetic.main.activity_main.*
 
-
+/*
 private const val STATE_PENDING_OPERATION = "PendingOperation"
 private const val STATE_OPERAND1 = "Operand1"
 private const val STATE_OPERAND1_STORED = "Operand1_Stored"
+*/
 
+//MainActivity only concerned to display the data and respond to user interaction
 class MainActivity : AppCompatActivity() {
-
-    //--- Variables referring to the widgets ---
-    //lateinit: declare a variable as "nullable", it will be initialize later in the program
-    //--private lateinit var result: EditText
-    //--private lateinit var newNumber: EditText
-
-    //lazy delegation: declare a value as "nullable", it will be initialize later in the program by the function "lazy"
-    //--private val displayOperation by lazy(LazyThreadSafetyMode.NONE) { findViewById<TextView>(R.id.operation) }
-
-    //Variables to hold the operands and type of calculation
-    //operand1 can be NULL
-    private var operand1: Double? = null
-    private var pendingOperation = "="
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Subscribe to View Model
+        val viewModel: BigDecimalViewModel by viewModels()
+        //Observe the data and update it
+        viewModel.stringResult.observe(this, { stringResult -> result.setText(stringResult) })
+        viewModel.stringNewNumber.observe(this, { stringNumber -> newNumber.setText(stringNumber) })
+        viewModel.stringOperation.observe(this, { stringOperation -> operation.text = stringOperation })
 
         /*
         result = findViewById(R.id.result)
@@ -61,8 +58,9 @@ class MainActivity : AppCompatActivity() {
 
         //Listener OnClickButton
         val listener = View.OnClickListener { v ->
-            val b = v as Button
-            newNumber.append(b.text)
+            viewModel.digitPressed((v as Button).text.toString())
+//            val b = v as Button
+//            newNumber.append(b.text)
         }
 
         //Assign the listener to the buttons
@@ -80,15 +78,16 @@ class MainActivity : AppCompatActivity() {
 
         //Listener OnClickButton for the operands
         val opListener = View.OnClickListener { v ->
-            val op: String = (v as Button).text.toString()
-            try {
-                val value = newNumber.text.toString().toDouble()
-                performOperation(value, op)
-            } catch (e: NumberFormatException) {
-                newNumber.setText("")
-            }
-            pendingOperation = op
-            operation.text = pendingOperation
+            viewModel.operandPressed((v as Button).text.toString())
+//            val op: String = (v as Button).text.toString()
+//            try {
+//                val value = newNumber.text.toString().toDouble()
+//                performOperation(value, op)
+//            } catch (e: NumberFormatException) {
+//                newNumber.setText("")
+//            }
+//            pendingOperation = op
+//            operation.text = pendingOperation
         }
 
         //Assign the listener to the buttons
@@ -100,31 +99,34 @@ class MainActivity : AppCompatActivity() {
         
         //Listener for the NEG button
         buttonNeg.setOnClickListener {
-            val value = newNumber.text.toString()
-            if (value.isEmpty()) {
-                newNumber.setText("-")
-            } else {
-                try {
-                    var doubleValue = value.toDouble()
-                    doubleValue *= -1
-                    newNumber.setText(doubleValue.toString())
-                } catch (e: NumberFormatException) {
-                    //number was "-" or ".", so clear it
-                    newNumber.setText("")
-                }
-            }
+            viewModel.negPressed()
+//            val value = newNumber.text.toString()
+//            if (value.isEmpty()) {
+//                newNumber.setText("-")
+//            } else {
+//                try {
+//                    var doubleValue = value.toDouble()
+//                    doubleValue *= -1
+//                    newNumber.setText(doubleValue.toString())
+//                } catch (e: NumberFormatException) {
+//                    //number was "-" or ".", so clear it
+//                    newNumber.setText("")
+//                }
+//            }
         }
 
         //Listener for the CLEAR button
         buttonClear.setOnClickListener {
-            operand1 = null
-            result.setText("")
-            newNumber.setText("")
-            operation.text = "="
+            viewModel.clearPressed()
+//            operand1 = null
+//            result.setText("")
+//            newNumber.setText("")
+//            operation.text = "="
         }
 
     }
 
+/*
     //Storing and retrieving the app's state when the device is rotated
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -146,30 +148,6 @@ class MainActivity : AppCompatActivity() {
         pendingOperation = savedInstanceState.getString(STATE_PENDING_OPERATION).toString()
         operation.text = pendingOperation
     }
-
-    //Function to perform the operation
-    private fun performOperation(value: Double, operation: String) {
-        if (operand1 == null) {
-            operand1 = value
-        } else {
-            if (pendingOperation == "=") {
-                pendingOperation = operation
-            }
-
-            when (pendingOperation) {
-                "=" -> operand1 = value
-                "/" -> operand1 = if (value == 0.0) {
-                    Double.NaN // handle attempt to divide by zero
-                } else {
-                    operand1!! / value //!! bang bang = sintax to handle a nullable variable in an operation with a non nullable variable
-                }
-                "*" -> operand1 = operand1!! * value
-                "-" -> operand1 = operand1!! - value
-                "+" -> operand1 = operand1!! + value
-            }
-        }
-        result.setText(operand1.toString())
-        newNumber.setText("")
-    }
+*/
 
 }
